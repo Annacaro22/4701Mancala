@@ -12,9 +12,6 @@ goal_p2 = [0]
 #current player whose turn it is
 curr_player = [1]
 
-#number 0-5 which represents which bowl was chosen by the current player
-chosen_move = 0
-
 game_end = [0] #0 means game should keep going, 1 means we've reached the end.
 
 landed_in_goal = [0] #0 means we did not land in goal, 1 means we did land in goal (so current player gets to go again)
@@ -95,10 +92,9 @@ def test_endcondition():
     if (total_p1_bowls == 0 or total_p2_bowls == 0): #one [or both] player[s] has run out of stones to play, game should end.
         goal_p1[0] = goal_p1[0] + total_p1_bowls
         goal_p2[0] = goal_p2[0] + total_p2_bowls
-        for i in player1_bowls:
-            i = 0
-        for i in player2_bowls:
-            i = 0
+        for i in range(6):
+            player1_bowls[i] = 0
+            player2_bowls[i] = 0
         game_end[0] = 1
         end_of_game()
 
