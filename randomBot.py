@@ -137,7 +137,7 @@ def make_a_move_p2(chosen_move, player1_bowls, player2_bowls, goal_p1, goal_p2, 
         player2_bowls[end_bowl] = 0
         player1_bowls[5 - end_bowl] = 0
 
-# returns the number of stones in the last third of the playes bowls
+# returns the number of stones in the last third of the players bowls
 def getHomeBowls(bowls):
     total = 0
     for i in range(len(bowls)//3):

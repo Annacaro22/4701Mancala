@@ -11,7 +11,7 @@ if choice == "human":
 elif choice == "bot":
     print("Would you like to play against a random bot or a smart bot?")
     choice = input("Enter 'random' or 'smart': ")
-    while choice != "ransom" and choice != "smart" and choice != "quit":
+    while choice != "random" and choice != "smart" and choice != "quit":
         choice = input("Invalid input. Please try again: ")
     if choice == "random":
         randomBot.runGame(True)
