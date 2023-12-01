@@ -1,4 +1,6 @@
 import random
+from random import seed
+import copy
 
 tab = "\t"
 nl = "\n"
@@ -55,13 +57,20 @@ def run_a_smart_round():
     test_endcondition()
     
 
-def alphaRunner():
-    p1bowls = player1_bowls.copy()
-    p2bowls = player2_bowls.copy()
-    p1goal = goal_p1.copy()
-    p2goal = goal_p2.copy()
-    depth = game_end.copy
-    v, move = alphabeta(float("-inf"), float("inf"), True, depth, p1bowls, p2bowls, p1goal, p2goal, [0])
+def alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2):
+    v = float("-inf")
+    move =  None
+    for i in range(6):
+        p1bowls = copy.copy(player1_bowls)
+        p2bowls = copy.copy(player2_bowls)
+        p1goal = copy.copy(goal_p1)
+        p2goal = copy.copy(goal_p2)
+        if p2bowls[i] != 0:
+            val = alphabeta(float("-inf"), float("inf"), False, 0, p1bowls, p2bowls, p1goal, p2goal, [0])
+            if val > v:
+                v = val
+                move = i
+
     return move
 
 def p1_getinput():
@@ -164,13 +173,19 @@ def getScore2():
 def getScoreDiff(goal1, goal2):
     return goal2[0] - goal1[0]
 
+def firstValid(bowls):
+    for i in range(len(bowls)):
+        if bowls[i] > 0:
+            return i
+    return 0
+
 def scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal):
-    score1w = -0.1
-    score2w = 0.1
-    scorediffw = 0.2
+    score1w = -0.2
+    score2w = 0.4
+    scorediffw = 0.3
     farbinw = 0.2
     getbinw = 0.1
-    return score1w*p1goal[0] + score2w*p2goal[0] + scorediffw*getScoreDiff(p1goal, p2goal) + farbinw*furthestBin(p2bowls) + getbinw*getHomeBowls(p2bowls)
+    return score1w*p1goal[0] + score2w*p2goal[0] + scorediffw*(p2goal[0] - p1goal[0]) + farbinw*furthestBin(p2bowls) + getbinw*getHomeBowls(p2bowls)
 
 def endChecker(p1bowls, p2bowls):
     total_p1_bowls = 0
@@ -180,34 +195,37 @@ def endChecker(p1bowls, p2bowls):
     for i in p2bowls:
         total_p2_bowls = total_p2_bowls + i
     if (total_p1_bowls == 0) or (total_p2_bowls == 0):
-        return 1
+        return [1]
+    else:
+        return [0]
     
 #alphabeta pruning for minimax
-def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal, move = None):
-    if depth == 1:
-        return scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal), move
+def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal):
+    if depth == [1]:
+        return scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal)
+    print(p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
     if maximizingPlayer:
         v = float("-inf")
         for i in range(6):
             if p2bowls[i] > 0:
                 make_a_move_p2(i, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
-                val, move = alphabeta(alpha, beta, False, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal, move)
+                val = alphabeta(alpha, beta, False, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
+                v = max(v, val)
                 if v > beta:
                     break
-                alpha = max(val, v)
-                move = i
-                return v, move
+                alpha = max(alpha, v)
+                return v
     else:
         v = float("inf")
         for i in range(6):
             if p1bowls[i] > 0:
                 make_a_move_p1(i, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
-                val, move = alphabeta(alpha, beta, False, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal, move)
+                val = alphabeta(alpha, beta, True, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
                 v = min(v, val)
                 if v < alpha:
                     break
                 beta = min(beta, v)
-                return v, move
+                return v
 
 
 
@@ -257,20 +275,24 @@ def runGame(rand):
 
 
 def runTest():
+
     p1_goals = 0
     p2_goals = 0
     ties = 0
-    player1_bowls, player2_bowls, goal_p1, goal_p2, curr_player, game_end, landed_in_goal = gameSet()  
-    for x in range(100):
+    for x in range(100): 
+        player1_bowls, player2_bowls, goal_p1, goal_p2, curr_player, game_end, landed_in_goal = gameSet()  
         while (game_end[0] == 0):
+            game_end = endChecker(player1_bowls, player2_bowls)
             if (curr_player[0] == 1):
                 input_move1 = 20
                 while (0 > input_move1 or input_move1 > 5 or player1_bowls[input_move1] == 0):
                     input_move1 = random.randint(0,5)
                 make_a_move_p1(input_move1, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
-            if (curr_player[0] == 2):
-                input_move2 = alphaRunner()
-                print(input_move2)
+                game_end= endChecker(player1_bowls, player2_bowls)
+            if (curr_player[0] == 2) and (game_end != [1]):
+                input_move2 = alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2)
+                if input_move2 == None:
+                    break
                 make_a_move_p2(input_move2, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
             if landed_in_goal[0] == 0:
                 if (curr_player[0] == 1):
@@ -278,8 +300,7 @@ def runTest():
                 else:
                     if (curr_player[0] == 2):
                         curr_player[0] = 1
-            if endChecker(player1_bowls, player2_bowls) == 1:
-                game_end[0] = 1
+            game_end = endChecker(player1_bowls, player2_bowls)
         if goal_p1[0] > goal_p2[0] :
             p1_goals = p1_goals + 1
         elif goal_p1[0] < goal_p2[0]:
