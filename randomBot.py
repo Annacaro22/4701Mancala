@@ -53,6 +53,7 @@ def run_a_smart_round():
         make_a_move_p1(input_move1, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
     if (curr_player[0] == 2):
         input_move2 = alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2)
+        print("Player 2 chose:", input_move2)
         make_a_move_p2(input_move2, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
     test_endcondition()
     
@@ -66,7 +67,9 @@ def alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2):
         p1goal = copy.copy(goal_p1)
         p2goal = copy.copy(goal_p2)
         if p2bowls[i] != 0:
-            val = alphabeta(float("-inf"), float("inf"), False, 0, p1bowls, p2bowls, p1goal, p2goal, [0])
+            make_a_move_p2(i, p1bowls, p2bowls, p1goal, p2goal, [0])
+            val = alphabeta(0, float("-inf"), float("inf"), False, 0, p1bowls, p2bowls, p1goal, p2goal, [0])
+            print(val)
             if val > v:
                 v = val
                 move = i
@@ -179,16 +182,15 @@ def firstValid(bowls):
             return i
     return 0
 
-def steal(p1bowls, p2bowls):
+def steal(m, p1bowls, p2bowls):
     stealmax = 0
-    for x in range(len(p2bowls)):
-        if p2bowls[x] == 0 and p1bowls[x] != 0:
-            for y in range(len(p2bowls)):
-                if p2bowls[y] + y >= x:
-                    stealmax = max(stealmax, p1bowls[x])
+    if p2bowls[(p2bowls[m] + m) % 5] == 0:
+        if p1bowls[(p2bowls[m] + m )% 5] != 0:
+            stealmax = p1bowls[(p2bowls[m] + m )% 5]
+
     return stealmax
 
-def scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal):
+def scoreHeuristic(m, p1bowls, p2bowls, p1goal, p2goal):
     #score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] 
     score1w = -0.1
     score2w = 0.1
@@ -196,7 +198,7 @@ def scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal):
     farbinw = 0.2
     getbinw = 0.1
     stealw = 0.2
-    return stealw * steal(p1bowls, p2bowls) + score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0]
+    return stealw * steal(m, p1bowls, p2bowls) + score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0]
 
 def endChecker(p1bowls, p2bowls):
     total_p1_bowls = 0
@@ -211,17 +213,16 @@ def endChecker(p1bowls, p2bowls):
         return [0]
     
 #alphabeta pruning for minimax
-def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal):
+def alphabeta(m,  alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal):
     if depth == [1]:
-        print(scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal))
-        return scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal)
+        return scoreHeuristic(m, p1bowls, p2bowls, p1goal, p2goal)
     
     if maximizingPlayer:
         v = float("-inf")
         for i in range(6):
             if p2bowls[i] > 0:
                 make_a_move_p2(i, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
-                val = alphabeta(alpha, beta, False, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
+                val = alphabeta(i, alpha, beta, False, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
                 v = max(v, val)
                 if v > beta:
                     break
@@ -232,7 +233,7 @@ def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p
         for i in range(6):
             if p1bowls[i] > 0:
                 make_a_move_p1(i, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
-                val = alphabeta(alpha, beta, True, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
+                val = alphabeta(i, alpha, beta, True, endChecker(p1bowls, p2bowls), p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
                 v = min(v, val)
                 if v < alpha:
                     break
@@ -282,6 +283,8 @@ def runGame(rand):
             else:
                 if (curr_player[0] == 2):
                     curr_player[0] = 1
+        if landed_in_goal[0] == 1:
+            landed_in_goal[0] = 0
         test_endcondition()  
     print("Game is Finished.")
 
