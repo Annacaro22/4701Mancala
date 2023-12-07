@@ -180,12 +180,12 @@ def firstValid(bowls):
     return 0
 
 def scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal):
-    score1w = -0.2
-    score2w = 0.4
+    score1w = -0.1
+    score2w = 0.1
     scorediffw = 0.3
     farbinw = 0.2
     getbinw = 0.1
-    return score1w*p1goal[0] + score2w*p2goal[0] + scorediffw*(p2goal[0] - p1goal[0]) + farbinw*furthestBin(p2bowls) + getbinw*getHomeBowls(p2bowls)
+    return score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] 
 
 def endChecker(p1bowls, p2bowls):
     total_p1_bowls = 0
@@ -203,7 +203,6 @@ def endChecker(p1bowls, p2bowls):
 def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal):
     if depth == [1]:
         return scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal)
-    print(p1bowls, p2bowls, p1goal, p2goal, landed_in_goal)
     if maximizingPlayer:
         v = float("-inf")
         for i in range(6):
