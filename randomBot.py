@@ -67,13 +67,21 @@ def alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2):
         p1goal = copy.copy(goal_p1)
         p2goal = copy.copy(goal_p2)
         if p2bowls[i] != 0:
+            stealscore, m = steal(p1bowls, p2bowls)
+            if stealscore > 0:
+                return m
             make_a_move_p2(i, p1bowls, p2bowls, p1goal, p2goal, [0])
-            val = alphabeta(0, float("-inf"), float("inf"), False, 0, p1bowls, p2bowls, p1goal, p2goal, [0])
-            print(val)
-            if val > v:
-                v = val
-                move = i
+            if getScoreDiff(p1goal, p2goal) > getScoreDiff(goal_p1, goal_p2) or p2goal > goal_p2:
+                return i
+            else:
+                if (game_end[0] != 1):
+                    val = alphabeta(0, float("-inf"), float("inf"), False, 0, p1bowls, p2bowls, p1goal, p2goal, [0])
+                    if val != None:
+                        if val > v:
+                            v = val
+                            move = i
 
+    
     return move
 
 def p1_getinput():
@@ -182,23 +190,38 @@ def firstValid(bowls):
             return i
     return 0
 
-def steal(m, p1bowls, p2bowls):
+def steal(p1bowls, p2bowls):
     stealmax = 0
-    if p2bowls[(p2bowls[m] + m) % 5] == 0:
-        if p1bowls[(p2bowls[m] + m )% 5] != 0:
-            stealmax = p1bowls[(p2bowls[m] + m )% 5]
+    move = 0
+    for x in range(len(p2bowls)):
+        if p2bowls[x] == 0 and p1bowls[5 - x] != 0:
+            for y in range(len(p2bowls)):
+                if p2bowls[y] != 0 and( p2bowls[y] + y) == x:
+                    if stealmax < p1bowls[5 - x]:
+                        stealmax = p1bowls[5 - x]
+                        move = y
+    return stealmax, move
 
-    return stealmax
+def oppSteal(p1bowls, p2bowls):
+    steal = 0
+    for x in range(len(p2bowls)):
+        if p2bowls[x] != 0:
+            for y in range(len(p1bowls)):
+                if p1bowls[y] != 0:
+                    if (5 - ((p1bowls[y] + y) % 5)) == x: 
+                        steal = p2bowls[x]
+    return steal
 
 def scoreHeuristic(m, p1bowls, p2bowls, p1goal, p2goal):
-    #score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] 
     score1w = -0.1
     score2w = 0.1
     scorediffw = 0.3
     farbinw = 0.2
     getbinw = 0.1
     stealw = 0.2
-    return stealw * steal(m, p1bowls, p2bowls) + score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0]
+    oppstealw = -0.2
+    stealscore, x = steal(p1bowls, p2bowls) 
+    return stealw * stealscore + score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] + oppstealw * oppSteal(p1bowls, p2bowls)
 
 def endChecker(p1bowls, p2bowls):
     total_p1_bowls = 0
@@ -239,8 +262,6 @@ def alphabeta(m,  alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal
                     break
                 beta = min(beta, v)
                 return v
-
-
 
 
 def test_endcondition():
@@ -294,7 +315,7 @@ def runTest():
     p1_goals = 0
     p2_goals = 0
     ties = 0
-    for x in range(100): 
+    for x in range(1000): 
         player1_bowls, player2_bowls, goal_p1, goal_p2, curr_player, game_end, landed_in_goal = gameSet()  
         while (game_end[0] == 0):
             game_end = endChecker(player1_bowls, player2_bowls)
@@ -303,7 +324,7 @@ def runTest():
                 while (0 > input_move1 or input_move1 > 5 or player1_bowls[input_move1] == 0):
                     input_move1 = random.randint(0,5)
                 make_a_move_p1(input_move1, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
-                game_end= endChecker(player1_bowls, player2_bowls)
+                game_end = endChecker(player1_bowls, player2_bowls)
             if (curr_player[0] == 2) and (game_end != [1]):
                 input_move2 = alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2)
                 if input_move2 == None:
