@@ -52,7 +52,7 @@ def run_a_smart_round():
         input_move1 = p1_getinput()
         make_a_move_p1(input_move1, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
     if (curr_player[0] == 2):
-        input_move2 = alphaRunner()
+        input_move2 = alphaRunner(player1_bowls, player2_bowls, goal_p1, goal_p2)
         make_a_move_p2(input_move2, player1_bowls, player2_bowls, goal_p1, goal_p2, landed_in_goal)
     test_endcondition()
     
@@ -179,13 +179,24 @@ def firstValid(bowls):
             return i
     return 0
 
+def steal(p1bowls, p2bowls):
+    stealmax = 0
+    for x in range(len(p2bowls)):
+        if p2bowls[x] == 0 and p1bowls[x] != 0:
+            for y in range(len(p2bowls)):
+                if p2bowls[y] + y >= x:
+                    stealmax = max(stealmax, p1bowls[x])
+    return stealmax
+
 def scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal):
+    #score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] 
     score1w = -0.1
     score2w = 0.1
     scorediffw = 0.3
     farbinw = 0.2
     getbinw = 0.1
-    return score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0] 
+    stealw = 0.2
+    return stealw * steal(p1bowls, p2bowls) + score2w*p2goal[0]  + scorediffw*(p2goal[0] - p1goal[0]) + score1w*p1goal[0]
 
 def endChecker(p1bowls, p2bowls):
     total_p1_bowls = 0
@@ -202,7 +213,9 @@ def endChecker(p1bowls, p2bowls):
 #alphabeta pruning for minimax
 def alphabeta( alpha, beta, maximizingPlayer, depth, p1bowls, p2bowls, p1goal, p2goal, landed_in_goal):
     if depth == [1]:
+        print(scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal))
         return scoreHeuristic(p1bowls, p2bowls, p1goal, p2goal)
+    
     if maximizingPlayer:
         v = float("-inf")
         for i in range(6):
