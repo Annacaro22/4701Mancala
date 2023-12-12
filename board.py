@@ -22,7 +22,7 @@ class Board():
         },
         'moving': []
     }
-    turn = 1
+    turn = 'p1'
 
     center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
     goal_width = 75
@@ -63,9 +63,9 @@ class Board():
         for i in range(6):
             x_pos = self.center[0] - self.surf.get_width()/2 + self.hor_offset*2 + self.goal_width + self.bowl_diameter/2 + (self.bowl_diameter+self.hor_offset)*i
             y_pos = self.center[1] - self.ver_offset/2 - self.bowl_diameter/2
-            self.p1_bowl_pos.append(np.array([x_pos,y_pos]))
-            y_pos += self.ver_offset + self.bowl_diameter
             self.p2_bowl_pos.append(np.array([x_pos,y_pos]))
+            y_pos += self.ver_offset + self.bowl_diameter
+            self.p1_bowl_pos.append(np.array([x_pos,y_pos]))
 
         # initialize stones
         self.init_stones()  
@@ -86,13 +86,13 @@ class Board():
         # draw left goal
         left = self.center[0]-(self.surf.get_width()/2) + self.hor_offset
         top = self.center[1]-(self.surf.get_height()/2) + self.ver_offset
-        self.p1_goal_pos = (self.center[0]-(self.surf.get_width()/2) + self.hor_offset + self.goal_width/2, self.center[1])
+        self.p2_goal_pos = (self.center[0]-(self.surf.get_width()/2) + self.hor_offset + self.goal_width/2, self.center[1])
         bound = pygame.Rect(left, top, self.goal_width, self.board_shape[1]-2*self.ver_offset)
         pygame.draw.ellipse(screen, BOWL_COLOR, bound)
 
         # draw right goal
         left = self.center[0]+(self.surf.get_width()/2) - self.hor_offset - self.goal_width
-        self.p2_goal_pos = (self.center[0]+(self.surf.get_width()/2) - self.hor_offset - self.goal_width/2, self.center[1])
+        self.p1_goal_pos = (self.center[0]+(self.surf.get_width()/2) - self.hor_offset - self.goal_width/2, self.center[1])
         bound = pygame.Rect(left, top, self.goal_width, self.board_shape[1]-2*self.ver_offset)
         pygame.draw.ellipse(screen, BOWL_COLOR, bound)
 

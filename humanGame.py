@@ -17,14 +17,16 @@ game_end = [0] #0 means game should keep going, 1 means we've reached the end.
 landed_in_goal = [0] #0 means we did not land in goal, 1 means we did land in goal (so current player gets to go again)
 
 
-def run_a_round():
-    print_gameboard()
-    print("It is player " + str(curr_player[0]) + "'s turn. Enter player " + str(curr_player[0]) + " move: ", end = '')
-    input_move = int(input())
+def run_a_round(move):
+    # print("It is player " + str(curr_player[0]) + "'s turn. Enter player " + str(curr_player[0]) + " move: ", end = '')
+    # input_move = int(input())
     if (curr_player[0] == 1):
-        make_a_move_p1(input_move)
+        make_a_move_p1(move)
     if (curr_player[0] == 2):
-        make_a_move_p2(input_move)
+        make_a_move_p2(move)
+    print_gameboard()
+    print()
+    print()
     test_endcondition()
 
 
@@ -123,4 +125,17 @@ def runGame():
 
     print("Game is Finished.")
 
+
+def run(move):
+    landed_in_goal[0] = 0
+    run_a_round(move)
+    if landed_in_goal[0] == 0:
+        if (curr_player[0] == 1):
+            curr_player[0] = 2
+        else:
+            if (curr_player[0] == 2):
+                curr_player[0] = 1
+    if not game_end[0]==0:
+        print("GAME FINISHED")
+    return (game_end[0]==0)
 
