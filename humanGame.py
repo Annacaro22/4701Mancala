@@ -137,5 +137,5 @@ def run(move):
                 curr_player[0] = 1
     if not game_end[0]==0:
         print("GAME FINISHED")
-    return (game_end[0]==0)
-
+        return True
+    return False

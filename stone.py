@@ -43,3 +43,8 @@ class Stone(pygame.sprite.Sprite):
                 self.moving = False
             else:
                 self.pos = self.pos + dist
+
+
+            
+        
+    

@@ -144,7 +144,6 @@ def distribute_stones(board, bowl):
         stone.jump_to(new_pos)
     (type, player, index) = next_bowl(board, type, player, index)
     board = drop_stone(board, type, player, index)
-    # if last stone, check for capture
     return board, (type, player, index)
     
 
@@ -167,9 +166,9 @@ def get_bowl_intersection(board, pos):
     return None
 
 
-def current_turn(board, bowl):
+def is_valid(board, bowl):
     (type, player, index) = bowl
-    return board.turn==player
+    return board.turn==player and (len(board.state[type][player][index])!=0)
         
 
 

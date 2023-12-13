@@ -328,11 +328,10 @@ def run(rand, move):
     test_endcondition()  
     if not game_end[0]==0:
         print("GAME FINISHED")
-        return bowl, True
     print_gameboard()
     print()
     print()
-    return bowl, False
+    return bowl
 
 
 def runTest():

@@ -114,8 +114,3 @@ class Board():
             stone.draw(screen)
         for stone in self.state['moving']:
             stone.draw(screen)
-
-        
-            
-
-   
